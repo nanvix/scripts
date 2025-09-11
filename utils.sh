@@ -268,7 +268,15 @@ normalize_version() {
 #     and returns 1 (false) if version1 is less than version2.
 #   - On failure, returns a non-zero status.
 #
-compare_tool_version() {
+# Usage Example
+#
+#   if compare_version "13.3.0" "13.2.5"; then
+#       echo "Version 13.3.0 is greater than or equal to 13
+#   else
+#       echo "Version 13.3.0 is less than 13.2.
+#   fi
+#
+compare_version() {
     local version1="$1"
     local version2="$2"
 
