@@ -400,6 +400,64 @@ get_tool_version() {
     printf '%s\n' "$version"
 }
 
+#
+# Description
+#
+#   Downloads a zip archive to /tmp and optionally verifies its SHA256 checksum.
+#
+# Parameters:
+#  - $1 URL of the dependency to download
+#  - $2 (Optional) Expected SHA256 checksum (with or without "sha256:" prefix)
+#
+# Returns Value
+#
+#   - On success, the path to the downloaded file.
+#   - On failure, returns a non-zero status.
+#
+# Usage Example
+#
+#   file_path=$(download "https://example.com/foo.zip" "sha256:...")
+#
+download() {
+    local dependency_url="$1"
+    local expected_checksum="${2:-}"
+
+    if [[ -z "$dependency_url" ]]; then
+        print_error "download requires URL parameter"
+        return 1
+    fi
+
+    # Generate temporary file name based on URL
+    local filename
+    filename=$(basename "$dependency_url")
+    local temp_file="/tmp/${filename}"
+
+
+    # Download dependency, if it does not already exist.
+    if [[ ! -f "$temp_file" ]]; then
+        wget -q "$dependency_url" -O "$temp_file" || {
+            print_error "Failed to download from $dependency_url"
+            return 1
+        }
+    fi
+
+    # Verify the checksum of the downloaded file, if provided.
+    if [[ -n "$expected_checksum" ]]; then
+        # Remove "sha256:" prefix if present
+        local clean_checksum="${expected_checksum#sha256:}"
+        local actual_checksum
+        actual_checksum=$(sha256sum "$temp_file" | awk '{print $1}')
+
+        if [[ "$actual_checksum" != "$clean_checksum" ]]; then
+            print_error "Checksum verification failed for $temp_file"
+            return 1
+        fi
+    fi
+
+    # Return path to downloaded file
+    printf '%s\n' "$temp_file"
+}
+
 #==================================================================================================
 # Rust
 #==================================================================================================
