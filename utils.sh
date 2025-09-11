@@ -162,9 +162,24 @@ get_os_id() {
         return 1
     fi
 
-    # Extract OS ID from file and trim whitespace
+    # Source /etc/os-release in a subshell so shell quoting is handled
+    # (this avoids exporting variables into the caller shell).
     local os_id
-    os_id=$(sed -n 's/^ID[[:space:]]*=[[:space:]]*"?\([^" ]*\)"?/\1/p' /etc/os-release | head -n1)
+    os_id=$( . /etc/os-release 2>/dev/null; printf '%s' "${ID:-}" )
+
+    # Trim surrounding whitespace just in case.
+    os_id=$(printf '%s' "$os_id" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+    # If ID is empty, try the ID_LIKE field (take the first token).
+    if [[ -z "$os_id" ]]; then
+        local id_like
+        id_like=$( . /etc/os-release 2>/dev/null; printf '%s' "${ID_LIKE:-}" )
+        id_like=$(printf '%s' "$id_like" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        if [[ -n "$id_like" ]]; then
+            # ID_LIKE can be space-separated; use the first entry.
+            os_id=$(printf '%s' "$id_like" | awk '{print $1}')
+        fi
+    fi
 
     # Check if OS ID was not extracted successfully.
     if [[ -z "$os_id" ]]; then
