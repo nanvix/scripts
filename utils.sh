@@ -211,9 +211,22 @@ get_os_version_id() {
         return 1
     fi
 
-    # Extract OS VERSION_ID from file and trim whitespace
+    # Source /etc/os-release in a subshell so shell quoting is handled.
     local os_version_id
-    os_version_id=$(sed -n 's/^VERSION_ID[[:space:]]*=[[:space:]]*"?\([^\"]*\)"?/\1/p' /etc/os-release | head -n1)
+    os_version_id=$( . /etc/os-release 2>/dev/null; printf '%s' "${VERSION_ID:-}" )
+
+    # Trim surrounding whitespace from extracted value.
+    os_version_id=$(printf '%s' "$os_version_id" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+    # If VERSION_ID is empty, try falling back to VERSION and extract numeric part.
+    if [[ -z "$os_version_id" ]]; then
+        local version_raw
+        version_raw=$( . /etc/os-release 2>/dev/null; printf '%s' "${VERSION:-}" )
+        version_raw=$(printf '%s' "$version_raw" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        if [[ -n "$version_raw" ]]; then
+            os_version_id=$(printf '%s' "$version_raw" | grep -oE '[0-9]+(\.[0-9]+)*' | head -n1 || true)
+        fi
+    fi
 
     # Check if VERSION_ID was not extracted successfully.
     if [[ -z "$os_version_id" ]]; then
