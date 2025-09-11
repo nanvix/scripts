@@ -1,0 +1,47 @@
+# Copyright(c) The Maintainers of Nanvix.
+# Licensed under the MIT License.
+
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches:
+      - dev
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on shell scripts
+        run: |
+          ./shell-lint.sh
+
+  spellcheck:
+    name: codespell (spell check)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install codespell
+        run: pip install --upgrade pip && pip install codespell
+
+      - name: Run codespell
+        run: |
+          # Run codespell across the repo. Adjust --skip and --ignore-words-list as needed.
+          # Skip common binary/image directories to reduce false positives.
+          echo "Running codespell..."
+          codespell --ignore-words-list=nanvix --skip=".git,.github,venv,venvs,node_modules,dist,build" .
