@@ -458,6 +458,52 @@ download() {
     printf '%s\n' "$temp_file"
 }
 
+#
+# Description
+#
+#   Extracts a zip archive to a given location and fixes ownership of the extracted files.
+#
+# Parameters:
+#
+#  - $1 Path to the zip file
+#  - $2 Extract location directory
+#
+# Usage Example
+#
+#   extract_zip "/tmp/foo.zip" "/opt/foo" && echo "Extraction succeeded" || echo "Extraction failed"
+#
+extract_zip() {
+    local zip_file="$1"
+    local extract_location="$2"
+
+    # Check if any parameter is missing.
+    if [[ -z "$zip_file" || -z "$extract_location" ]]; then
+        print_error "extract_zip requires zip file and extract location parameters"
+        return 1
+    fi
+
+    print_info "Extracting ${zip_file} to $extract_location"
+    # Attempt to create the extract directory if it does not exist.
+    mkdir -p "$extract_location" || {
+        print_error "Failed to create extract directory '${extract_location}'"
+        return 1
+    }
+
+    unzip -q "$zip_file" -d "$extract_location" || {
+        print_error "Failed to extract '${zip_file}' to '${extract_location}'"
+        return 1
+    }
+
+    # Fix ownership of the extracted files.
+    # This is safe because we are not running this script as root.
+    print_info "Fixing ownership of the extracted files..."
+    if ! chown -R "$(id -u):$(id -g)" "$extract_location"; then
+        print_warning "Could not change ownership of extracted files in '$extract_location'. You may need to adjust permissions manually."
+    fi
+
+    return 0
+}
+
 #==================================================================================================
 # Rust
 #==================================================================================================
