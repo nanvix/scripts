@@ -495,7 +495,58 @@ extract_zip() {
     }
 
     # Fix ownership of the extracted files.
-    # This is safe because we are not running this script as root.
+    print_info "Fixing ownership of the extracted files..."
+    if ! chown -R "$(id -u):$(id -g)" "$extract_location"; then
+        print_warning "Could not change ownership of extracted files in '$extract_location'. You may need to adjust permissions manually."
+    fi
+
+    return 0
+}
+
+#
+# Description
+#
+#   Extracts a .tar.bz2 (or .tbz/.tbz2) archive to a given location and fixes ownership of the extracted files.
+#
+# Parameters
+#
+#  - $1 Path to the tar.bz2 file
+#  - $2 Extract location directory
+#
+# Usage Example
+#
+#   extract_tar_bz2 "/tmp/foo.tar.bz2" "/opt/foo" && echo "Extraction succeeded" || echo "Extraction failed"
+#
+extract_tar_bz2() {
+    local tar_file="$1"
+    local extract_location="$2"
+
+    # Check if any parameter is missing.
+    if [[ -z "$tar_file" || -z "$extract_location" ]]; then
+        print_error "extract_tar_bz2 requires tar file and extract location parameters"
+        return 1
+    fi
+
+    # Check that the archive exists.
+    if [[ ! -f "$tar_file" ]]; then
+        print_error "Tar archive '$tar_file' does not exist."
+        return 1
+    fi
+
+    print_info "Extracting ${tar_file} to $extract_location"
+    # Attempt to create the extract directory if it does not exist.
+    mkdir -p "$extract_location" || {
+        print_error "Failed to create extract directory '${extract_location}'"
+        return 1
+    }
+
+    # Extract using tar. Support bzip2-compressed tarballs (.tar.bz2, .tbz, .tbz2).
+    if ! tar -xjf "$tar_file" -C "$extract_location" >/dev/null 2>&1; then
+        print_error "Failed to extract '${tar_file}' to '${extract_location}'"
+        return 1
+    fi
+
+    # Fix ownership of the extracted files.
     print_info "Fixing ownership of the extracted files..."
     if ! chown -R "$(id -u):$(id -g)" "$extract_location"; then
         print_warning "Could not change ownership of extracted files in '$extract_location'. You may need to adjust permissions manually."
