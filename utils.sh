@@ -311,7 +311,67 @@ compare_version() {
     # versions are equal.
     return 0
 }
+_
+#==================================================================================================
+# Tools
+#==================================================================================================
 
+#
+# Get the version of a tool.
+#
+# Parameters:
+#   - $1 Tool name.
+#
+# Returns:
+#   - On success, the version string of the tool.
+#   - On failure, returns a non-zero status.
+#
+# Example:
+#
+#   get_tool_version "gcc"
+#
+get_tool_version() {
+    local tool="$1"
+    local version
+    local output
+
+    # Ensure a tool was provided.
+    if [[ -z "$tool" ]]; then
+        print_error "get_tool_version: no tool specified."
+        return 1
+    fi
+
+    # If the command isn't available, fail early.
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        print_error "'${tool}' is not installed."
+        return 1
+    fi
+
+    case "$tool" in
+        gcc | make | wget | zip)
+            output=$("$tool" --version 2>&1) || output=$("$tool" -v 2>&1) || output=$("$tool" -V 2>&1) || true
+            ;;
+        unzip)
+            output=$("$tool" 2>&1) || true
+            ;;
+        *)
+            # Try common version invocations. Fall back to --help if none print a version.
+            output=$("$tool" --version 2>&1) || output=$("$tool" -v 2>&1) || output=$("$tool" -V 2>&1) || output=$("$tool" version 2>&1) || output=$("$tool" --help 2>&1) || true
+            ;;
+    esac
+
+    # Extract version: allow 1 to 3 numeric parts (e.g., 1, 1.2, 1.2.3).
+    version=$(printf '%s' "$output" | grep -oE '[0-9]+(\.[0-9]+){0,2}' | head -n1)
+
+    # Check if version is empty.
+    if [[ -z "$version" ]]; then
+        print_error "Unable to determine '${tool}' version."
+        return 1
+    fi
+
+    printf '%s\n' "$version"
+}
+_
 #==================================================================================================
 # Rust
 #==================================================================================================
