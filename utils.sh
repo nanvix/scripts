@@ -38,7 +38,7 @@ readonly NC='\033[0m'        # No Color
 #
 #   Prints an error message on stderr.
 #
-# Arguments
+# Parameters
 #
 #   $1 - The error message to print.
 #
@@ -55,7 +55,7 @@ print_error() {
 #
 #   Prints a success message on stdout.
 #
-# Arguments
+# Parameters
 #
 #   $1 - The success message to print.
 #
@@ -72,7 +72,7 @@ print_success() {
 #
 #   Prints a message on stdout.
 #
-# Arguments
+# Parameters
 #
 #   $1 - The message to print.
 #
@@ -89,7 +89,7 @@ print_info() {
 #
 #   Prints a warning message on stderr.
 #
-# Arguments
+# Parameters
 #
 #   $1 - The warning message to print.
 #
@@ -106,7 +106,7 @@ print_warning() {
 #
 #  Prints a panic error message on stderr and exits with status 1.
 #
-# Arguments
+# Parameters
 #
 #   $1 - The panic error message to print.
 #
@@ -246,7 +246,7 @@ get_os_version_id() {
 #
 #   Normalizes a version string to have 3 parts (e.g., "4.3" -> "4.3.0").
 #
-# Arguments
+# Parameters
 #
 #   $1 - The version string to normalize.
 #
@@ -285,7 +285,7 @@ normalize_version() {
 #
 #   Compares two version strings (e.g., "13.3.0" vs "13.2.5").
 #
-# Arguments
+# Parameters
 #
 #   $1 - The first version string to compare.
 #   $2 - The second version string to compare.
@@ -347,7 +347,7 @@ compare_version() {
 #
 # Get the version of a tool.
 #
-# Parameters:
+# Parameters
 #   - $1 Tool name.
 #
 # Returns:
@@ -405,7 +405,7 @@ get_tool_version() {
 #
 #   Downloads a zip archive to /tmp and optionally verifies its SHA256 checksum.
 #
-# Parameters:
+# Parameters
 #  - $1 URL of the dependency to download
 #  - $2 (Optional) Expected SHA256 checksum (with or without "sha256:" prefix)
 #
@@ -463,7 +463,7 @@ download() {
 #
 #   Extracts a zip archive to a given location and fixes ownership of the extracted files.
 #
-# Parameters:
+# Parameters
 #
 #  - $1 Path to the zip file
 #  - $2 Extract location directory
@@ -513,7 +513,7 @@ extract_zip() {
 #
 #   Gets the current version from a Cargo.toml file.
 #
-# Arguments
+# Parameters
 #
 #   $1 - The path to the Cargo.toml file.
 #
@@ -568,7 +568,7 @@ get_cargo_toml_version() {
 #
 #   Reads a value from a simple, single-level TOML file with key = value pairs.
 #
-# Arguments
+# Parameters
 #
 #   $1 - The path to the TOML file.
 #   $2 - The key to get the value for.
