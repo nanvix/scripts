@@ -928,7 +928,7 @@ _install_project() {
 
     local old_path="$PATH"
 
-    # If sysroot locaiton is set add it to PATH. Otherwise, add install location.
+    # If sysroot location is set add it to PATH. Otherwise, add install location.
     local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
     export PATH="${sysroot_location}/bin:${PATH}"
 
@@ -990,7 +990,7 @@ _build_project() {
 
     local old_path="$PATH"
 
-    # If sysroot locaiton is set add it to PATH. Otherwise, add install location.
+    # If sysroot location is set add it to PATH. Otherwise, add install location.
     local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
     export PATH="${sysroot_location}/bin:${PATH}"
 
@@ -1062,7 +1062,7 @@ _configure_project() {
 
     local old_path="$PATH"
 
-    # If sysroot locaiton is set add it to PATH. Otherwise, add install location.
+    # If sysroot location is set add it to PATH. Otherwise, add install location.
     local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
     export PATH="${sysroot_location}/bin:${PATH}"
 
