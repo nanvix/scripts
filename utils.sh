@@ -705,7 +705,7 @@ readonly DEFAULT_TARGET="i686-nanvix"
 # Default build stage.
 readonly DEFAULT_STAGE="0"
 # Default install location.
-readonly DEFAULT_INSTALL_LOCATION="${HOME}"
+readonly DEFAULT_INSTALL_LOCATION="${HOME}/nanvix"
 # Default sysroot location.
 readonly DEFAULT_SYSROOT_LOCATION=""
 
