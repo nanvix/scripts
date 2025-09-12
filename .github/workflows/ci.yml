@@ -25,7 +25,7 @@ jobs:
           ./shell-lint.sh
 
   spellcheck:
-    name: codespell (spell check)
+    name: Spellcheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,9 +39,6 @@ jobs:
       - name: Install codespell
         run: pip install --upgrade pip && pip install codespell
 
-      - name: Run codespell
+      - name: Run codespell-lint
         run: |
-          # Run codespell across the repo. Adjust --skip and --ignore-words-list as needed.
-          # Skip common binary/image directories to reduce false positives.
-          echo "Running codespell..."
-          codespell --ignore-words-list=nanvix --skip=".git,.github,venv,venvs,node_modules,dist,build" .
+          ./codespell-lint.sh
