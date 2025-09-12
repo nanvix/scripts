@@ -707,7 +707,7 @@ readonly DEFAULT_STAGE="0"
 # Default install location.
 readonly DEFAULT_INSTALL_LOCATION="${HOME}"
 # Default sysroot location.
-readonly DEFAULT_SYSROOT_LOCATION="${HOME}"
+readonly DEFAULT_SYSROOT_LOCATION=""
 
 # Target.
 Z_TARGET="${DEFAULT_TARGET}"
@@ -927,7 +927,11 @@ _install_project() {
     }
 
     local old_path="$PATH"
-    export PATH="${Z_SYSROOT_LOCATION}/bin:${PATH}"
+
+    # Add sysroot bin directory to PATH if sysroot location is set.
+    if [[ -n "$Z_SYSROOT_LOCATION" ]]; then
+        export PATH="${Z_SYSROOT_LOCATION}/bin:${PATH}"
+    fi
 
     install_steps || {
         export PATH="${old_path}"
@@ -986,7 +990,11 @@ _build_project() {
     }
 
     local old_path="$PATH"
-    export PATH="${Z_SYSROOT_LOCATION}/bin:${PATH}"
+
+    # Add sysroot bin directory to PATH if sysroot location is set.
+    if [[ -n "$Z_SYSROOT_LOCATION" ]]; then
+        export PATH="${Z_SYSROOT_LOCATION}/bin:${PATH}"
+    fi
 
     build_steps "${parallel_build_option}" || {
         export PATH="${old_path}"
@@ -1055,7 +1063,11 @@ _configure_project() {
     }
 
     local old_path="$PATH"
-    export PATH="$Z_SYSROOT_LOCATION/bin:${PATH}"
+
+    # Add sysroot bin directory to PATH if sysroot location is set.
+    if [[ -n "$Z_SYSROOT_LOCATION" ]]; then
+        export PATH="${Z_SYSROOT_LOCATION}/bin:${PATH}"
+    fi
 
     configure_steps || {
         print_error "Configuration failed"
