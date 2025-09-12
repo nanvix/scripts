@@ -1019,8 +1019,8 @@ _build_project() {
 # Global Variables
 #
 #   - Z_PROJECT_NAME: Name of the project (for logging purposes).
-#   - TARGET: Build target (for logging purposes).
-#   - SYSROOT_LOCATION: Location of the sysroot (for logging purposes).
+#   - Z_TARGET: Build target (for logging purposes).
+#   - Z_SYSROOT_LOCATION: Location of the sysroot (for logging purposes).
 #   - Z_PROJECT_BUILD_DIR: Directory where the project will be built.
 #
 # Return Value
