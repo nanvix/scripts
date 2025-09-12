@@ -928,10 +928,9 @@ _install_project() {
 
     local old_path="$PATH"
 
-    # Add sysroot bin directory to PATH if sysroot location is set.
-    if [[ -n "$Z_SYSROOT_LOCATION" ]]; then
-        export PATH="${Z_SYSROOT_LOCATION}/bin:${PATH}"
-    fi
+    # If sysroot locaiton is set add it to PATH. Otherwise, add install location.
+    local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
+    export PATH="${sysroot_location}/bin:${PATH}"
 
     install_steps || {
         export PATH="${old_path}"
@@ -991,10 +990,9 @@ _build_project() {
 
     local old_path="$PATH"
 
-    # Add sysroot bin directory to PATH if sysroot location is set.
-    if [[ -n "$Z_SYSROOT_LOCATION" ]]; then
-        export PATH="${Z_SYSROOT_LOCATION}/bin:${PATH}"
-    fi
+    # If sysroot locaiton is set add it to PATH. Otherwise, add install location.
+    local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
+    export PATH="${sysroot_location}/bin:${PATH}"
 
     build_steps "${parallel_build_option}" || {
         export PATH="${old_path}"
@@ -1064,10 +1062,9 @@ _configure_project() {
 
     local old_path="$PATH"
 
-    # Add sysroot bin directory to PATH if sysroot location is set.
-    if [[ -n "$Z_SYSROOT_LOCATION" ]]; then
-        export PATH="${Z_SYSROOT_LOCATION}/bin:${PATH}"
-    fi
+    # If sysroot locaiton is set add it to PATH. Otherwise, add install location.
+    local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
+    export PATH="${sysroot_location}/bin:${PATH}"
 
     configure_steps || {
         print_error "Configuration failed"
