@@ -1317,6 +1317,7 @@ _show_project_config() {
         print_info "  Sysroot location: $Z_SYSROOT_LOCATION"
         [[ -n "$Z_PARALLEL_BUILD" ]] && print_info "  Parallel build: $Z_PARALLEL_BUILD"
         print_info "  Release name: ${Z_RELEASE_NAME:-$(_get_default_release_name)}"
+        print_info "  Stage: $Z_STAGE"
         return 0
     else
         return 1
