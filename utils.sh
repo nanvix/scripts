@@ -555,6 +555,35 @@ extract_tar_bz2() {
     return 0
 }
 
+#
+# Description
+#
+#   Enables compilation caching using sccache, if available.
+#
+# Return Value
+#
+#   - Returns 0 (true) if sccache was found and caching enabled.
+#   - Returns 1 (false) if sccache is not available and caching was not enabled.
+#
+# Usage Example
+#
+#   enable_compilation_caching && echo "Caching enabled" || echo "Caching not enabled"
+#
+# Notes
+#
+#   - This function may modify the CC, CXX, and RUSTC_WRAPPER environment variables.
+#
+enable_compilation_caching() {
+    if command -v sccache >/dev/null 2>&1; then
+        export CC="sccache gcc"
+        export CXX="sccache g++"
+        export RUSTC_WRAPPER="sccache"
+        return 0
+    else
+        return 1
+    fi
+}
+
 #==================================================================================================
 # Rust
 #==================================================================================================
