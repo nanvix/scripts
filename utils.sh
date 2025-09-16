@@ -720,6 +720,8 @@ readonly RELEASE_NAME_OPT_NAME="--release-name"
 readonly STAGE_OPT_NAME="--stage"
 # Name for sysroot location option.
 readonly SYSROOT_LOCATION_OPT_NAME="--sysroot-location"
+# Name for preserve PATH option.
+readonly PRESERVE_PATH_OPT_NAME="--preserve-path"
 
 # Configuration file path
 readonly Z_CONFIG_FILE="${PROJECT_DIR}/.z.config"
@@ -750,6 +752,8 @@ Z_PARALLEL_BUILD=""
 Z_RELEASE_NAME=
 # Sysroot location.
 Z_SYSROOT_LOCATION="$DEFAULT_SYSROOT_LOCATION"
+# Preserve PATH flag: 'yes' => keep PATH unchanged; 'no' => modify PATH (default)
+Z_PRESERVE_PATH="no"
 
 #
 # Description
@@ -956,10 +960,13 @@ _install_project() {
     }
 
     local old_path="$PATH"
-
-    # If sysroot location is set add it to PATH. Otherwise, add install location.
-    local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
-    export PATH="${sysroot_location}/bin:${PATH}"
+    if [[ "$Z_PRESERVE_PATH" == "no" ]]; then
+        # If sysroot location is set add it to PATH. Otherwise, add install location.
+        local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
+        export PATH="${sysroot_location}/bin:${PATH}"
+    else
+        print_info "Preserving existing PATH for install phase"
+    fi
 
     install_steps || {
         export PATH="${old_path}"
@@ -1018,10 +1025,13 @@ _build_project() {
     }
 
     local old_path="$PATH"
-
-    # If sysroot location is set add it to PATH. Otherwise, add install location.
-    local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
-    export PATH="${sysroot_location}/bin:${PATH}"
+    if [[ "$Z_PRESERVE_PATH" == "no" ]]; then
+        # If sysroot location is set add it to PATH. Otherwise, add install location.
+        local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
+        export PATH="${sysroot_location}/bin:${PATH}"
+    else
+        print_info "Preserving existing PATH for build phase"
+    fi
 
     build_steps "${parallel_build_option}" || {
         export PATH="${old_path}"
@@ -1090,10 +1100,13 @@ _configure_project() {
     }
 
     local old_path="$PATH"
-
-    # If sysroot location is set add it to PATH. Otherwise, add install location.
-    local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
-    export PATH="${sysroot_location}/bin:${PATH}"
+    if [[ "$Z_PRESERVE_PATH" == "no" ]]; then
+        # If sysroot location is set add it to PATH. Otherwise, add install location.
+        local sysroot_location="${Z_SYSROOT_LOCATION:-${Z_INSTALL_LOCATION}}"
+        export PATH="${sysroot_location}/bin:${PATH}"
+    else
+        print_info "Preserving existing PATH for configure phase"
+    fi
 
     configure_steps || {
         print_error "Configuration failed"
@@ -1189,7 +1202,7 @@ Utility for building and installing ${Z_PROJECT_NAME} for Nanvix.
 
 Usage: ./z COMMAND   [OPTIONS]
        ./z ${BUILD_CMD_NAME}
-       ./z ${CONFIGURE_CMD_NAME} [${PARALLEL_BUILD_OPT_NAME}=N] [${INSTALL_LOCATION_OPT_NAME}=PATH] [${SYSROOT_LOCATION_OPT_NAME}=PATH] [${STAGE_OPT_NAME}=N]
+       ./z ${CONFIGURE_CMD_NAME} [${PARALLEL_BUILD_OPT_NAME}=N] [${INSTALL_LOCATION_OPT_NAME}=PATH] [${SYSROOT_LOCATION_OPT_NAME}=PATH] [${STAGE_OPT_NAME}=N] [${PRESERVE_PATH_OPT_NAME}]
        ./z ${HELP_CMD_NAME}
        ./z ${INSTALL_CMD_NAME}
        ./z ${RELEASE_CMD_NAME}
@@ -1208,6 +1221,7 @@ Commands:
 Options:
   ${INSTALL_LOCATION_OPT_NAME}=PATH  Set install location to 'PATH'          (defaults to '${DEFAULT_INSTALL_LOCATION}')
   ${PARALLEL_BUILD_OPT_NAME}=N       Use 'N' parallel threads when building  (defaults to using all available CPU cores)
+  ${PRESERVE_PATH_OPT_NAME}          Do not modify PATH during configure/build/install
   ${RELEASE_NAME_OPT_NAME}=NAME      Set the release name to 'NAME'          (defaults to '${default_release_name}')
   ${STAGE_OPT_NAME}=N                Set build stage to 'N'                  (defaults to '${DEFAULT_STAGE}')
   ${SYSROOT_LOCATION_OPT_NAME}=PATH  Set sysroot location to 'PATH'          (defaults to '${DEFAULT_SYSROOT_LOCATION}')
@@ -1256,6 +1270,10 @@ _parse_project_args() {
                 Z_SYSROOT_LOCATION="${1#*=}"
                 shift
                 ;;
+            "${PRESERVE_PATH_OPT_NAME}")
+                Z_PRESERVE_PATH="yes"
+                shift
+                ;;
             *)
                 print_error "Unknown option '$1'"
                 return 1
@@ -1288,6 +1306,7 @@ Z_SYSROOT_LOCATION="$Z_SYSROOT_LOCATION"
 Z_PARALLEL_BUILD="$Z_PARALLEL_BUILD"
 Z_RELEASE_NAME="${release_name}"
 Z_STAGE="$Z_STAGE"
+Z_PRESERVE_PATH="$Z_PRESERVE_PATH"
 EOF
 
     print_info "Configuration parameters saved to $Z_CONFIG_FILE"
@@ -1316,6 +1335,13 @@ _load_project_config() {
             print_error "Failed to source configuration file: $Z_CONFIG_FILE"
             return 1
         }
+        # Backward compatibility: legacy values '' (empty) -> no, '1' -> yes
+        case "${Z_PRESERVE_PATH:-}" in
+            "1") Z_PRESERVE_PATH="yes" ;;
+            "yes"|"no") ;; # valid
+            "") Z_PRESERVE_PATH="no" ;;
+            *) Z_PRESERVE_PATH="no" ;;
+        esac
     else
         print_error "Configuration file not found: $Z_CONFIG_FILE"
         return 1
@@ -1347,6 +1373,7 @@ _show_project_config() {
         [[ -n "$Z_PARALLEL_BUILD" ]] && print_info "  Parallel build: $Z_PARALLEL_BUILD"
         print_info "  Release name: ${Z_RELEASE_NAME:-$(_get_default_release_name)}"
         print_info "  Stage: $Z_STAGE"
+        print_info "  Preserve PATH: $Z_PRESERVE_PATH"
         return 0
     else
         return 1
