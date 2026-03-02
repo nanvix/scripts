@@ -376,7 +376,7 @@ get_tool_version() {
     fi
 
     case "$tool" in
-        gcc | make | wget | zip)
+        gcc | make | wget | zip | bzip2)
             output=$("$tool" --version 2>&1) || output=$("$tool" -v 2>&1) || output=$("$tool" -V 2>&1) || true
             ;;
         unzip)
