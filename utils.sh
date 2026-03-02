@@ -376,7 +376,7 @@ get_tool_version() {
     fi
 
     case "$tool" in
-        gcc | make | wget | zip)
+        gcc | make | wget | zip | bzip2)
             output=$("$tool" --version 2>&1) || output=$("$tool" -v 2>&1) || output=$("$tool" -V 2>&1) || true
             ;;
         unzip)
@@ -389,7 +389,13 @@ get_tool_version() {
     esac
 
     # Extract version: allow 1 to 3 numeric parts (e.g., 1, 1.2, 1.2.3).
-    version=$(printf '%s' "$output" | grep -oE '[0-9]+(\.[0-9]+){0,2}' | head -n1)
+    # bzip2 --version outputs "bzip2, ... Version 1.0.8 ..." so the generic
+    # regex would match the trailing "2" in "bzip2" first; extract after "Version".
+    if [[ "$tool" == "bzip2" ]]; then
+        version=$(printf '%s' "$output" | grep -oE 'Version [0-9]+(\.[0-9]+){0,2}' | grep -oE '[0-9]+(\.[0-9]+){0,2}' | head -n1)
+    else
+        version=$(printf '%s' "$output" | grep -oE '[0-9]+(\.[0-9]+){0,2}' | head -n1)
+    fi
 
     # Check if version is empty.
     if [[ -z "$version" ]]; then
